@@ -1,5 +1,5 @@
 from flask import Flask, request, send_file
-from flask_cors import CORS  # Importe o CORS
+from flask_cors import CORS
 import os
 from image_descriptor import process_images
 from reportlab.lib.pagesizes import letter
@@ -9,7 +9,7 @@ from io import BytesIO
 from datetime import datetime
 
 app = Flask(__name__)
-CORS(app)  # Adicione esta linha para habilitar CORS para toda a aplicação
+CORS(app)
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -44,10 +44,19 @@ def upload_file():
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
             uploaded_files.append(file_path)
-    
+
     # Processa as imagens após o upload
     image_descriptions = process_images(app.config['UPLOAD_FOLDER'])
-    
+
+    # Adiciona lógica para capturar observações
+    for desc in image_descriptions:
+        comodo = desc['room']
+        index = desc['image'].split('_')[1]  # Extrai o índice do nome do arquivo
+        observacao_key = f'observacao_{comodo}_{index}'
+        observacao = request.form.get(observacao_key)
+        if observacao:
+            desc['observacao'] = observacao
+
     # Gera o PDF
     pdf_buffer = generate_pdf(image_descriptions, vistoria_info)
     
@@ -93,11 +102,17 @@ def generate_pdf(image_descriptions, vistoria_info):
     # Adiciona conteúdo para cada cômodo
     for room, descriptions in rooms.items():
         elements.append(Paragraph(room.upper(), styles['Heading2']))
-        for i, desc in enumerate(descriptions, start=1):
-            elements.append(Paragraph(f"{i}. {desc['description']}", styles['Normal']))
+        for desc in descriptions:
+            elements.append(Paragraph(desc['description'], styles['Normal']))
             img_path = os.path.join(app.config['UPLOAD_FOLDER'], desc['image'])
             img = Image(img_path, width=200, height=150)
             elements.append(img)
+
+            # Adiciona a observação, se existir
+            if 'observacao' in desc:
+                elements.append(Paragraph(f"Observação: {desc['observacao']}", styles['Normal']))
+                elements[-1].textColor = (1, 0, 0)  # Muda a cor da observação para vermelho
+
             elements.append(Spacer(1, 12))
 
     # Salva o PDF no buffer
