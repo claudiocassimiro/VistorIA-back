@@ -1,14 +1,14 @@
 from flask import Flask, request, send_file
 from flask_cors import CORS
 import os
-from image_descriptor import process_images
+from vistoria_back.image_descriptor import process_images
 from reportlab.lib.pagesizes import letter
 from io import BytesIO
 from datetime import datetime
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
 from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle, KeepTogether
 
 app = Flask(__name__)
 CORS(app)
@@ -81,15 +81,6 @@ def upload_file():
         download_name=f"vistoria_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
         mimetype='application/pdf'
     )
-
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle, KeepTogether
-from reportlab.lib import colors
-from io import BytesIO
-import os
-from datetime import datetime
 
 def generate_styled_pdf(rooms, vistoria_info):
     buffer = BytesIO()
