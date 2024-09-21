@@ -9,6 +9,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle, KeepTogether
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 CORS(app)
@@ -17,6 +18,8 @@ UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Aumenta o limite de tamanho do upload para 1GB
+app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 1024
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -42,7 +45,7 @@ def upload_file():
     uploaded_files = []
     for file in files:
         if file and allowed_file(file.filename):
-            filename = file.filename
+            filename = secure_filename(file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
             uploaded_files.append(file_path)

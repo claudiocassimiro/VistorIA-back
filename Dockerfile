@@ -20,5 +20,5 @@ COPY . .
 EXPOSE 5000
 
 # Comando para executar a aplicação
-CMD ["poetry", "run", "gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "vistoria_back.main:app"]
+CMD ["poetry", "run", "gunicorn", "-w", "4", "-b", "0.0.0.0:5000",  "--timeout", "0", "vistoria_back.main:app"]
 
