@@ -9,6 +9,7 @@ services:
       - ./vistoria_back:/app/vistoria_back 
     networks:
       - app-network
+    restart: on-failure  # Reinicia o app quando ocorre um erro
 
   nginx:
     image: nginx:latest
@@ -23,6 +24,7 @@ services:
       - app-network
     depends_on:
       - app
+    restart: always  # Sempre reinicia o Nginx, mesmo que ele pare sem erro
 
 networks:
   app-network:
