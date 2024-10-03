@@ -19,7 +19,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/ssl:/etc/nginx/ssl
-      - /home/tensordock/projects/VistorIA-back/nginx/webroot:/home/tensordock/projects/VistorIA-back/nginx/webroot
+      - /root/projects/VistorIA-back/nginx/webroot:/root/projects/VistorIA-back/nginx/webroot
     networks:
       - app-network
     depends_on:
