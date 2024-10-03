@@ -1,6 +1,7 @@
 from flask import Flask, request, send_file
 from flask_cors import CORS
 import os
+import json
 from vistoria_back.image_descriptor import process_images
 from reportlab.lib.pagesizes import letter
 from io import BytesIO
@@ -42,6 +43,9 @@ def upload_file():
         'nome_vistoriador': request.form.get('nome_vistoriador', 'Vistoriador não identificado')
     }
     
+    observacoes = json.loads(request.form.get('observacoes', '{}'))
+    rooms = json.loads(request.form.get('rooms', '{}'))
+    
     uploaded_files = []
     for file in files:
         if file and allowed_file(file.filename):
@@ -53,25 +57,25 @@ def upload_file():
     # Processa as imagens após o upload
     image_descriptions = process_images(app.config['UPLOAD_FOLDER'])
 
-    # Adiciona lógica para capturar observações
+    # Adiciona as observações às descrições das imagens e associa com as rooms corretas
     for desc in image_descriptions:
-        comodo = desc['room']
-        index = desc['image'].split('_')[1]  # Extrai o índice do nome do arquivo
-        observacao_key = f'observacao_{comodo}_{index}'
-        observacao = request.form.get(observacao_key)
-        if observacao:
-            desc['observacao'] = observacao
+        file_name = desc['image']
+        comodo, index = file_name.split('_')[:2]
+        chave = f"{comodo}_{index}"
+        if chave in observacoes:
+            desc['observacao'] = observacoes[chave]
+        desc['room'] = next((room for room, value in rooms.items() if chave.lower().replace(' ', '').replace('-', '').replace('_', '').translate(str.maketrans('', '', 'áéíóúâêîôûãõàèìòùäëïöüç')).startswith(value.lower().replace(' ', '').replace('-', '').replace('_', '').translate(str.maketrans('', '', 'áéíóúâêîôûãõàèìòùäëïöüç')))), 'Cômodo não especificado')
 
     # Agrupa descrições por cômodo
-    rooms = {}
+    grouped_rooms = {}
     for desc in image_descriptions:
         room = desc['room']
-        if room not in rooms:
-            rooms[room] = []
-        rooms[room].append(desc)
+        if room not in grouped_rooms:
+            grouped_rooms[room] = []
+        grouped_rooms[room].append(desc)
 
     # Gera o PDF
-    pdf_buffer = generate_styled_pdf(rooms, vistoria_info)
+    pdf_buffer = generate_styled_pdf(grouped_rooms, vistoria_info)
     
     # Exclui as imagens da pasta 'uploads' após retornar o PDF
     for file_path in uploaded_files:
