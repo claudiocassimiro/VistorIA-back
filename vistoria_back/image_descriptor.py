@@ -16,7 +16,7 @@ def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return b64encode(image_file.read()).decode('utf-8')
 
-def process_images(upload_folder):
+def process_images(upload_folder, observacoes):
     results = []
     
     for filename in os.listdir(upload_folder):
@@ -24,11 +24,18 @@ def process_images(upload_folder):
             image_path = os.path.join(upload_folder, filename)
             base64_image = encode_image(image_path)
             
+            # Extrai o nome do cômodo e o índice do nome do arquivo
+            comodo, index = filename.split('_')[:2]
+            chave = f"{comodo}_{index}"
+            observacao_usuario = observacoes.get(chave, "")
+            
             # Prepara os headers e o payload
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {api_key}"
             }
+            
+            prompt = f"Analise a imagem. Ela faz parte de uma vistoria de apartamento. Sua missão é descrever o que a imagem está mostrando, focando nos principais detalhes e comentando problemas visíveis. Seja sucinto e direto na descrição. Descreva o móvel ou parte da casa que está na imagem. Seja objetivo e direto na descrição. Uma única frase. Não comece com 'A imagem mostra' ou 'A imagem contém'. Apenas a frase. Observação do usuário: {observacao_usuario}"
             
             payload = {
                 "model": "gpt-4o-mini",
@@ -38,7 +45,7 @@ def process_images(upload_folder):
                         "content": [
                             {
                                 "type": "text",
-                                "text": "Analise a imagem. Ela faz parte de uma vistoria de apartamento. Sua missão é descrever o que a imagem tá mostrando, focando nos principais detalhes e comentando problemas visíveis. Seja sucinto e direto na descrição. Descrevendo o móvel ou parte da casa que está na imagem. Seja objetivo e direto na descrição. Uma única frase. Não comece com 'A imagem mostra' ou 'A imagem contém'. Apenas a frase."
+                                "text": prompt
                             },
                             {
                                 "type": "image_url",

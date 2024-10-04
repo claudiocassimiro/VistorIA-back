@@ -55,15 +55,13 @@ def upload_file():
             uploaded_files.append(file_path)
 
     # Processa as imagens após o upload
-    image_descriptions = process_images(app.config['UPLOAD_FOLDER'])
+    image_descriptions = process_images(app.config['UPLOAD_FOLDER'], observacoes)
 
-    # Adiciona as observações às descrições das imagens e associa com as rooms corretas
+    # Associa as descrições das imagens com as rooms corretas
     for desc in image_descriptions:
         file_name = desc['image']
         comodo, index = file_name.split('_')[:2]
         chave = f"{comodo}_{index}"
-        if chave in observacoes:
-            desc['observacao'] = observacoes[chave]
         desc['room'] = next((room for room, value in rooms.items() if chave.lower().replace(' ', '').replace('-', '').replace('_', '').translate(str.maketrans('', '', 'áéíóúâêîôûãõàèìòùäëïöüç')).startswith(value.lower().replace(' ', '').replace('-', '').replace('_', '').translate(str.maketrans('', '', 'áéíóúâêîôûãõàèìòùäëïöüç')))), 'Cômodo não especificado')
 
     # Agrupa descrições por cômodo
@@ -121,16 +119,6 @@ def generate_styled_pdf(rooms, vistoria_info):
         spaceAfter=8
     )
 
-    # Estilo de observação em itálico
-    observation_style = ParagraphStyle(
-        'ObservationStyle',
-        fontSize=10,
-        fontName='Helvetica-Oblique',
-        alignment=TA_LEFT,
-        spaceAfter=8,
-        textColor=colors.red
-    )
-
     elements = []
 
     # Adiciona cabeçalho com as informações de vistoria
@@ -170,13 +158,6 @@ def generate_styled_pdf(rooms, vistoria_info):
                     Paragraph(f"Imagem não encontrada: {desc['image']}", normal_style)
                 ])
 
-            # Adiciona a observação, se existir
-            if 'observacao' in desc:
-                room_elements.append([
-                    Paragraph(f"Observação: {desc['observacao']}", observation_style),
-                    Spacer(1, 12)
-                ])
-
             # Tabela para organizar o layout como CSS Flexbox
             table = Table(room_elements, colWidths=[250, 200])
             table.setStyle(TableStyle([
@@ -191,8 +172,9 @@ def generate_styled_pdf(rooms, vistoria_info):
 
     # Tabela de assinaturas no final
     assinatura_data = [
-        [f"__________________________ ASS. __________________________",
-         f"{vistoria_info['locador']}      {vistoria_info['locatario']}"]
+        ["__________________________", "__________________________"],
+        ["ASS.", "ASS."],
+        [f"{vistoria_info['locador']}", f"{vistoria_info['locatario']}"]
     ]
     assinatura_table = Table(assinatura_data, colWidths=[250, 250])
     assinatura_table.setStyle(TableStyle([
