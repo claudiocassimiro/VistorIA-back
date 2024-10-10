@@ -2,7 +2,7 @@ from flask import Flask, request, send_file
 from flask_cors import CORS
 import os
 import json
-from vistoria_back.image_descriptor import process_images
+from image_descriptor import process_images
 from reportlab.lib.pagesizes import letter
 from io import BytesIO
 from datetime import datetime
@@ -63,6 +63,7 @@ def upload_file():
         comodo, index = file_name.split('_')[:2]
         chave = f"{comodo}_{index}"
         desc['room'] = next((room for room, value in rooms.items() if chave.lower().replace(' ', '').replace('-', '').replace('_', '').translate(str.maketrans('', '', 'áéíóúâêîôûãõàèìòùäëïöüç')).startswith(value.lower().replace(' ', '').replace('-', '').replace('_', '').translate(str.maketrans('', '', 'áéíóúâêîôûãõàèìòùäëïöüç')))), 'Cômodo não especificado')
+        desc['observacao'] = observacoes.get(chave, '')
 
     # Agrupa descrições por cômodo
     grouped_rooms = {}
@@ -133,6 +134,16 @@ def generate_styled_pdf(rooms, vistoria_info):
     elements.append(Paragraph(f"Endereço: {vistoria_info['endereco_imovel']}", normal_style))
     elements.append(Spacer(1, 12))
 
+    # Estilo de observação em itálico
+    observation_style = ParagraphStyle(
+        'ObservationStyle',
+        fontSize=10,
+        fontName='Helvetica-Oblique',
+        alignment=TA_LEFT,
+        spaceAfter=8,
+        textColor=colors.red
+    )
+
     # Adiciona conteúdo para cada cômodo
     for room, descriptions in rooms.items():
         # Adicionando um contêiner para o cômodo
@@ -156,6 +167,13 @@ def generate_styled_pdf(rooms, vistoria_info):
                 room_elements.append([
                     Paragraph(desc['description'], normal_style),
                     Paragraph(f"Imagem não encontrada: {desc['image']}", normal_style)
+                ])
+
+            # Adiciona a observação, se existir
+            if 'observacao' in desc:
+                room_elements.append([
+                    Paragraph(f"Observação: {desc['observacao']}", observation_style),
+                    Spacer(1, 12)
                 ])
 
             # Tabela para organizar o layout como CSS Flexbox
