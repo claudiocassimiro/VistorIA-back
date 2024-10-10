@@ -120,6 +120,16 @@ def generate_styled_pdf(rooms, vistoria_info):
         spaceAfter=8
     )
 
+    # Estilo de observação em itálico
+    observation_style = ParagraphStyle(
+        'ObservationStyle',
+        fontSize=10,
+        fontName='Helvetica-Oblique',
+        alignment=TA_LEFT,
+        spaceAfter=8,
+        textColor=colors.red
+    )
+
     elements = []
 
     # Adiciona cabeçalho com as informações de vistoria
@@ -133,16 +143,6 @@ def generate_styled_pdf(rooms, vistoria_info):
     elements.append(Paragraph(f"Data de Início: {data_inicio_formatada}", normal_style))
     elements.append(Paragraph(f"Endereço: {vistoria_info['endereco_imovel']}", normal_style))
     elements.append(Spacer(1, 12))
-
-    # Estilo de observação em itálico
-    observation_style = ParagraphStyle(
-        'ObservationStyle',
-        fontSize=10,
-        fontName='Helvetica-Oblique',
-        alignment=TA_LEFT,
-        spaceAfter=8,
-        textColor=colors.red
-    )
 
     # Adiciona conteúdo para cada cômodo
     for room, descriptions in rooms.items():
