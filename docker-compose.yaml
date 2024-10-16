@@ -7,25 +7,25 @@ services:
       - POETRY_VIRTUALENVS_CREATE=false
     volumes:
       - ./vistoria_back:/app/vistoria_back 
-    networks:
-      - app-network
+#    networks:
+#      - app-network
     restart: on-failure  # Reinicia o app quando ocorre um erro
 
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"  # Mapeia a porta 8080 do host para a porta 80 do container
-      - "443:443"  # Mapeia a porta 8443 do host para a porta 443 do container
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/ssl:/etc/nginx/ssl
-      - /root/projects/VistorIA-back/nginx/webroot:/root/projects/VistorIA-back/nginx/webroot
-    networks:
-      - app-network
-    depends_on:
-      - app
-    restart: always  # Sempre reinicia o Nginx, mesmo que ele pare sem erro
+#  nginx:
+#    image: nginx:latest
+#    ports:
+#      - "80:80"  # Mapeia a porta 8080 do host para a porta 80 do container
+#      - "443:443"  # Mapeia a porta 8443 do host para a porta 443 do container
+#    volumes:
+#      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+#      - ./nginx/ssl:/etc/nginx/ssl
+#      - /root/projects/VistorIA-back/nginx/webroot:/root/projects/VistorIA-back/nginx/webroot
+#    networks:
+#      - app-network
+#    depends_on:
+#      - app
+#    restart: always  # Sempre reinicia o Nginx, mesmo que ele pare sem erro
 
-networks:
-  app-network:
-    driver: bridge
+#networks:
+#  app-network:
+#    driver: bridge
