@@ -2,10 +2,10 @@ from flask import Blueprint, request, send_file, current_app
 from flask_cors import CORS
 import os
 import json
-from image_descriptor import process_images
+from vistoria_back.image_descriptor import process_images
 from datetime import datetime
 from werkzeug.utils import secure_filename
-from utils.generate_pdf import generate_styled_pdf
+from vistoria_back.utils.generate_pdf import generate_styled_pdf
 
 upload_bp = Blueprint('upload', __name__)
 CORS(upload_bp)

@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
-from routes.upload_bp import init_app as init_upload_bp
+from vistoria_back.routes.upload_bp import init_app as init_upload_bp
 
 app = Flask(__name__)
 CORS(app)
